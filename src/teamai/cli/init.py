@@ -1,0 +1,63 @@
+DEFAULT_TEAMFILE = """team:
+  name: minimal_team
+
+models:
+  default:
+    provider: fake
+    model: fake
+    capabilities:
+      json_mode: true
+      structured_output: false
+      tool_calling: false
+
+agents:
+  planner:
+    kind: planner
+    model: default
+    capabilities: [planning]
+    instructions: Produce small, bounded task plans.
+
+  coder:
+    kind: specialist
+    model: default
+    capabilities: [python]
+    tools:
+      - filesystem.list
+      - filesystem.read
+      - filesystem.write
+    instructions: Produce clear artifacts.
+
+  critic:
+    kind: critic
+    model: default
+    capabilities: [review]
+    instructions: Evaluate artifacts against acceptance criteria.
+
+  finalizer:
+    kind: finalizer
+    model: default
+    capabilities: [synthesis]
+    instructions: Summarize reviewed artifacts for the user.
+
+workflow:
+  strategy: plan_execute_review
+
+limits:
+  max_model_calls: 30
+  max_tool_calls: 50
+  max_tasks: 8
+  max_revisions_per_task: 2
+  max_parse_retries: 1
+  max_runtime_seconds: 900
+  max_output_tokens_per_call: 4096
+  max_parallel_tasks: 1
+
+security:
+  workspace_root: ./workspace
+  require_plan_approval: false
+  require_approval_for:
+    - filesystem.write
+
+persistence:
+  sqlite_path: .teamai/runs.sqlite
+"""
