@@ -42,6 +42,27 @@ async with TeamRuntime.from_file("team.yaml", auto_approve=True) as runtime:
     result = await runtime.run(goal="Write a report file")
 ```
 
+Real models use the `openai_compatible` provider. Set the API key in an environment
+variable and point `base_url` at your endpoint:
+
+```yaml
+models:
+  default:
+    provider: openai_compatible
+    model: gpt-4o-mini
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    capabilities:
+      json_mode: true
+      structured_output: false
+      tool_calling: false
+```
+
+```bash
+export OPENAI_API_KEY=sk-...
+teamai run team.yaml --input "Summarize this workspace" --yes
+```
+
 Development checks:
 
 ```bash

@@ -25,7 +25,7 @@ def test_release_workflow_builds_distributions_without_publishing() -> None:
     workflow = _load_workflow("release.yml")
 
     assert workflow["name"] == "Release"
-    assert workflow["permissions"]["contents"] == "read"
+    assert workflow["permissions"]["contents"] == "write"
 
     commands = _run_commands(workflow, job_name="build")
     assert "uv sync --extra dev --locked" in commands
@@ -42,6 +42,14 @@ def test_release_workflow_builds_distributions_without_publishing() -> None:
         "name": "python-distributions",
         "path": "dist/*",
         "if-no-files-found": "error",
+    }
+
+    release_step = _step_named(workflow, "Create GitHub Release", job_name="build")
+    assert release_step["uses"] == "softprops/action-gh-release@v2"
+    assert release_step["if"] == "startsWith(github.ref, 'refs/tags/')"
+    assert release_step["with"] == {
+        "files": "dist/*",
+        "generate_release_notes": True,
     }
 
 
